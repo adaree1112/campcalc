@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Camp Calculator</title>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f0ede8;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.22);
+    --text: #1a1a18;
+    --text2: #6b6860;
+    --text3: #9e9b94;
+    --green: #1a7a58;
+    --green-bg: #e2f4ec;
+    --green-dark: #0d4f38;
+    --red: #c0392b;
+    --red-bg: #fdecea;
+    --red-dark: #7a1c14;
+    --accent: #2c4a8f;
+  }
+
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .app { width: 100%; max-width: 520px; }
+
+  /* ── header ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+  .wordmark {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text3);
+    font-family: 'Courier New', monospace;
+  }
+  .settings-btn {
+    background: none;
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.08em;
+    color: var(--text2);
+    transition: background 0.15s, color 0.15s;
+  }
+  .settings-btn:hover { background: var(--surface2); color: var(--text); }
+
+  /* ── settings panel ── */
+  .settings-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #f5f4f0;
+    z-index: 100;
+    overflow-y: auto;
+    padding: 2rem 1rem 4rem;
+  }
+  .settings-overlay.open { display: block; }
+  .settings-inner {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+  .settings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+  .settings-title {
+    font-size: 22px;
+    font-weight: normal;
+    letter-spacing: -0.01em;
+  }
+  .close-btn {
+    background: none;
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.08em;
+    color: var(--text2);
+    transition: background 0.15s;
+  }
+  .close-btn:hover { background: var(--surface2); color: var(--text); }
+
+  .settings-section {
+    margin-bottom: 2rem;
+  }
+  .settings-section-title {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-family: 'Courier New', monospace;
+    color: var(--text3);
+    margin-bottom: 0.75rem;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .setting-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-label {
+    flex: 1;
+    font-size: 14px;
+    font-family: 'Georgia', serif;
+    color: var(--text);
+  }
+  .setting-label-sub {
+    display: block;
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+  .num-input {
+    width: 64px !important;
+    text-align: center;
+    padding: 6px 8px !important;
+    font-size: 14px !important;
+  }
+  .text-input-sm {
+    width: 160px !important;
+    padding: 6px 10px !important;
+    font-size: 13px !important;
+  }
+
+  /* sm-enable toggle row in settings */
+  .sm-enable-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .sm-enable-label { flex:1; font-size: 14px; font-family: 'Georgia', serif; color: var(--text); }
+
+  .reset-defaults {
+    margin-top: 1rem;
+    background: none;
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.06em;
+    color: var(--text2);
+    transition: background 0.15s;
+  }
+  .reset-defaults:hover { background: var(--surface2); color: var(--text); }
+
+  /* ── screens ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .step-indicator {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 1.75rem;
+    align-items: center;
+  }
+  .step-pip {
+    height: 3px;
+    flex: 1;
+    background: var(--border);
+    border-radius: 2px;
+    transition: background 0.3s;
+  }
+  .step-pip.done { background: var(--green); }
+  .step-pip.active { background: var(--accent); }
+
+  h2 {
+    font-size: 22px;
+    font-weight: normal;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+    letter-spacing: -0.01em;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 1.75rem;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.02em;
+  }
+
+  .field { margin-bottom: 1.25rem; }
+  .field > label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text2);
+    font-family: 'Courier New', monospace;
+    margin-bottom: 8px;
+  }
+
+  select, input[type="text"], input[type="number"] {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 15px;
+    font-family: 'Georgia', serif;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: 4px;
+    appearance: none;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  select:focus, input:focus { border-color: var(--accent); }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239e9b94' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+  input[type="number"] { -moz-appearance: textfield; }
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .toggle-row:hover { border-color: var(--accent); }
+  .toggle { position: relative; width: 38px; height: 20px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .t-track {
+    position: absolute; inset: 0;
+    background: var(--border);
+    border-radius: 10px;
+    transition: background 0.2s;
+    border: 1px solid var(--border2);
+  }
+  .t-track::before {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    left: 2px; top: 2px;
+    background: var(--text2);
+    border-radius: 50%;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .toggle input:checked + .t-track { background: var(--green); border-color: var(--green); }
+  .toggle input:checked + .t-track::before { transform: translateX(18px); background: white; }
+  .toggle-text { font-size: 15px; font-family: 'Georgia', serif; color: var(--text); }
+  .toggle-hint { font-size: 11px; color: var(--text3); font-family: 'Courier New', monospace; margin-left: auto; }
+
+  .role-section { margin-bottom: 1.5rem; }
+  .role-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+  .role-header h3 { font-size: 16px; font-weight: normal; }
+  .role-mult {
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.08em;
+    color: var(--text2);
+    border: 1px solid var(--border2);
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+
+  .add-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .add-row input { flex: 1; }
+  .btn-add {
+    padding: 10px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+    color: var(--text2);
+    white-space: nowrap;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn-add:hover { background: var(--surface2); border-color: var(--accent); color: var(--text); }
+
+  .chip-area {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 34px;
+    padding: 6px 8px;
+    background: var(--surface2);
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  .chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+    padding: 3px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    cursor: pointer;
+    color: var(--text);
+    transition: border-color 0.1s, color 0.1s;
+  }
+  .chip:hover { border-color: var(--red); color: var(--red); }
+  .chip-x { font-size: 11px; opacity: 0.5; }
+  .chip-empty { font-size: 12px; color: var(--text3); font-family: 'Courier New', monospace; padding: 4px 2px; }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 1.75rem; }
+  .btn {
+    padding: 11px 22px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.05em;
+    transition: opacity 0.15s, background 0.15s;
+  }
+  .btn-back { background: transparent; border: 1px solid var(--border2); color: var(--text2); }
+  .btn-back:hover { background: var(--surface2); color: var(--text); }
+  .btn-next { background: var(--text); border: 1px solid var(--text); color: var(--bg); flex: 1; }
+  .btn-next:hover { opacity: 0.8; }
+  .btn-reset { background: transparent; border: 1px solid var(--border2); color: var(--text2); }
+  .btn-reset:hover { background: var(--surface2); color: var(--text); }
+
+  .vote-counter {
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.1em;
+    color: var(--text3);
+    margin-bottom: 1.5rem;
+  }
+  .vote-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .vote-name { font-size: 30px; font-weight: normal; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+  .vote-role { font-size: 12px; font-family: 'Courier New', monospace; letter-spacing: 0.1em; color: var(--text3); text-transform: uppercase; }
+  .vote-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .vote-btn {
+    padding: 12px 26px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.06em;
+    transition: opacity 0.15s, transform 0.1s;
+    border: none;
+  }
+  .vote-btn:active { transform: scale(0.97); }
+  .v-like { background: var(--green); color: white; }
+  .v-impartial { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); }
+  .v-dislike { background: var(--red); color: white; }
+  .v-like:hover, .v-dislike:hover { opacity: 0.85; }
+
+  .result-banner { border-radius: 6px; padding: 2rem; text-align: center; margin-bottom: 1.25rem; }
+  .r-camp { background: var(--green-bg); border: 1px solid rgba(26,122,88,0.3); }
+  .r-nocamp { background: var(--red-bg); border: 1px solid rgba(192,57,43,0.3); }
+  .result-verdict { font-size: 34px; font-weight: normal; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+  .r-camp .result-verdict { color: var(--green-dark); }
+  .r-nocamp .result-verdict { color: var(--red-dark); }
+  .result-pts { font-size: 13px; font-family: 'Courier New', monospace; letter-spacing: 0.05em; }
+  .r-camp .result-pts { color: var(--green); }
+  .r-nocamp .result-pts { color: var(--red); }
+
+  .breakdown { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+  .bd-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 14px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Courier New', monospace;
+  }
+  .bd-row:last-child { border-bottom: none; font-weight: bold; background: var(--surface2); font-size: 14px; }
+  .bd-label { color: var(--text2); }
+  .bd-row:last-child .bd-label { color: var(--text); }
+  .pos { color: var(--green); }
+  .neg { color: var(--red); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="wordmark">Noam &mdash; Camp Calculator</div>
+    <button class="settings-btn" onclick="openSettings()">&#9881; settings</button>
+  </div>
+
+  <!-- ══════════════ SETTINGS OVERLAY ══════════════ -->
+  <div class="settings-overlay" id="settings-overlay">
+    <div class="settings-inner">
+      <div class="settings-header">
+        <span class="settings-title">Settings</span>
+        <button class="close-btn" onclick="closeSettings()">&#10005; close</button>
+      </div>
+
+      <!-- SM flag -->
+      <div class="settings-section">
+        <div class="settings-section-title">Big Decision flag</div>
+
+        <div class="sm-enable-row">
+          <span class="sm-enable-label">Enable Big Decision flag</span>
+          <label class="toggle">
+            <input type="checkbox" id="cfg-sm-enabled" checked onchange="updateSMNameFieldState()">
+            <span class="t-track"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <span class="setting-label">
+            Flag name
+            <span class="setting-label-sub">what to call this flag on screen 1</span>
+          </span>
+          <input type="text" id="cfg-sm-name" class="text-input-sm" value="SM">
+        </div>
+      </div>
+
+      <!-- Megasite -->
+      <div class="settings-section">
+        <div class="settings-section-title">Megasite</div>
+        <div class="setting-row">
+          <span class="setting-label">Points delta</span>
+          <input type="number" id="cfg-mega-pts" class="num-input" value="-3">
+        </div>
+      </div>
+
+      <!-- Year groups -->
+      <div class="settings-section">
+        <div class="settings-section-title">Year group points</div>
+        <div class="setting-row">
+          <span class="setting-label">Shoreshim Aleph</span>
+          <input type="number" id="cfg-yg-shori_a" class="num-input" value="-2">
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Shoreshim Bet</span>
+          <input type="number" id="cfg-yg-shori_b" class="num-input" value="2">
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Nevatim Aleph</span>
+          <input type="number" id="cfg-yg-nevi_a" class="num-input" value="-10">
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Nevatim Bet</span>
+          <input type="number" id="cfg-yg-nevi_b" class="num-input" value="5">
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Nofim Aleph</span>
+          <input type="number" id="cfg-yg-nofi_a" class="num-input" value="5">
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Nofim Bet</span>
+          <input type="number" id="cfg-yg-nofi_b" class="num-input" value="0">
+        </div>
+      </div>
+
+      <!-- Role multipliers -->
+      <div class="settings-section">
+        <div class="settings-section-title">Role multipliers</div>
+        <div class="setting-row">
+          <span class="setting-label">Roshim</span>
+          <input type="number" id="cfg-role-rosh" class="num-input" value="4">
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">3rd timers</span>
+          <input type="number" id="cfg-role-third" class="num-input" value="3">
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">2nd timers</span>
+          <input type="number" id="cfg-role-second" class="num-input" value="2">
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">1st timers</span>
+          <input type="number" id="cfg-role-first" class="num-input" value="1">
+        </div>
+      </div>
+
+      <button class="reset-defaults" onclick="resetDefaults()">&#8635; restore defaults</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ SCREEN 1: FLAGS ══════════════ -->
+  <div id="s1" class="screen active">
+    <div class="step-indicator">
+      <div class="step-pip active"></div>
+      <div class="step-pip"></div>
+      <div class="step-pip"></div>
+      <div class="step-pip"></div>
+    </div>
+    <h2>Global flags</h2>
+    <p class="subtitle">Step 1 of 4 &mdash; overall parameters</p>
+
+    <div class="field" id="sm-field">
+      <label id="sm-field-label">Big Desicion status</label>
+      <div class="toggle-row" onclick="document.getElementById('sm-t').click()">
+        <label class="toggle" onclick="event.stopPropagation()">
+          <input type="checkbox" id="sm-t">
+          <span class="t-track"></span>
+        </label>
+        <span class="toggle-text" id="sm-toggle-label">Big Decision</span>
+        <span class="toggle-hint">auto &rarr; not camp</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Site type</label>
+      <div class="toggle-row" onclick="document.getElementById('mega-t').click()">
+        <label class="toggle" onclick="event.stopPropagation()">
+          <input type="checkbox" id="mega-t">
+          <span class="t-track"></span>
+        </label>
+        <span class="toggle-text">Megasite</span>
+        <span class="toggle-hint" id="mega-hint">&minus;3 pts</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Year group</label>
+      <select id="yg">
+        <option value="">— select —</option>
+        <option value="shori_a">Shoreshim Aleph</option>
+        <option value="shori_b">Shoreshim Bet</option>
+        <option value="nevi_a">Nevatim Aleph</option>
+        <option value="nevi_b">Nevatim Bet</option>
+        <option value="nofi_a">Nofim Aleph</option>
+        <option value="nofi_b">Nofim Bet</option>
+      </select>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-next" onclick="s1Next()">People &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ SCREEN 2: PEOPLE ══════════════ -->
+  <div id="s2" class="screen">
+    <div class="step-indicator">
+      <div class="step-pip done"></div>
+      <div class="step-pip active"></div>
+      <div class="step-pip"></div>
+      <div class="step-pip"></div>
+    </div>
+    <h2>Add people</h2>
+    <p class="subtitle">Step 2 of 4 &mdash; click a name to remove it</p>
+    <div id="roles-ui"></div>
+    <div class="btn-row">
+      <button class="btn btn-back" onclick="goTo(0)">&larr;</button>
+      <button class="btn btn-next" onclick="s2Next()">Start voting &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ SCREEN 3: VOTE ══════════════ -->
+  <div id="s3" class="screen">
+    <div class="step-indicator">
+      <div class="step-pip done"></div>
+      <div class="step-pip done"></div>
+      <div class="step-pip active"></div>
+      <div class="step-pip"></div>
+    </div>
+    <h2>Vote</h2>
+    <p class="subtitle">Step 3 of 4 &mdash; no running total shown</p>
+    <div id="vote-area"></div>
+  </div>
+
+  <!-- ══════════════ SCREEN 4: RESULT ══════════════ -->
+  <div id="s4" class="screen">
+    <div class="step-indicator">
+      <div class="step-pip done"></div>
+      <div class="step-pip done"></div>
+      <div class="step-pip done"></div>
+      <div class="step-pip done"></div>
+    </div>
+    <h2>Result</h2>
+    <p class="subtitle">Step 4 of 4 &mdash; final decision</p>
+    <div id="result-area"></div>
+    <div class="btn-row" style="margin-top:1.25rem;">
+      <button class="btn btn-reset" onclick="resetAll()">&larr; Start over</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ─── defaults ─── */
+const DEFAULTS = {
+  smEnabled: true,
+  smName: 'Big Decision',
+  megaPts: -3,
+  yg: { shori_a: -2, shori_b: 2, nevi_a: -10, nevi_b: 5, nofi_a: 5, nofi_b: 0 },
+  roles: { rosh: 4, third: 3, second: 2, first: 1 },
+};
+
+/* ─── config (live, edited in settings) ─── */
+let CFG = deepClone(DEFAULTS);
+
+function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
+
+const YG_LABELS = {
+  shori_a: 'Shoreshim Aleph',
+  shori_b: 'Shoreshim Bet',
+  nevi_a:  'Nevatim Aleph',
+  nevi_b:  'Nevatim Bet',
+  nofi_a:  'Nofim Aleph',
+  nofi_b:  'Nofim Bet',
+};
+
+const ROLE_DEFS = [
+  { key: 'rosh',   label: 'Roshim'     },
+  { key: 'third',  label: '3rd timers' },
+  { key: 'second', label: '2nd timers' },
+  { key: 'first',  label: '1st timers' },
+];
+
+/* ─── session state ─── */
+let S = fresh();
+function fresh() {
+  return {
+    sm: false, mega: false, yg: '',
+    people: { rosh:[], third:[], second:[], first:[] },
+    queue: [], votes: [], idx: 0,
+  };
+}
+
+/* ─── settings panel ─── */
+function openSettings() {
+  // push current CFG into inputs
+  document.getElementById('cfg-sm-enabled').checked = CFG.smEnabled;
+  document.getElementById('cfg-sm-name').value = CFG.smName;
+  document.getElementById('cfg-mega-pts').value = CFG.megaPts;
+  Object.keys(CFG.yg).forEach(k => {
+    document.getElementById('cfg-yg-' + k).value = CFG.yg[k];
+  });
+  Object.keys(CFG.roles).forEach(k => {
+    document.getElementById('cfg-role-' + k).value = CFG.roles[k];
+  });
+  updateSMNameFieldState();
+  document.getElementById('settings-overlay').classList.add('open');
+}
+
+function closeSettings() {
+  // read values back into CFG
+  CFG.smEnabled = document.getElementById('cfg-sm-enabled').checked;
+  CFG.smName    = document.getElementById('cfg-sm-name').value.trim() || 'Big Decision';
+  CFG.megaPts   = parseInt(document.getElementById('cfg-mega-pts').value) || 0;
+  Object.keys(CFG.yg).forEach(k => {
+    CFG.yg[k] = parseInt(document.getElementById('cfg-yg-' + k).value) || 0;
+  });
+  Object.keys(CFG.roles).forEach(k => {
+    CFG.roles[k] = parseInt(document.getElementById('cfg-role-' + k).value) || 0;
+  });
+
+  // reflect changes in screen 1 UI
+  const smField = document.getElementById('sm-field');
+  smField.style.display = CFG.smEnabled ? '' : 'none';
+  document.getElementById('sm-toggle-label').textContent = CFG.smName;
+  document.getElementById('sm-field-label').textContent  = CFG.smName + ' status';
+
+  const megaDelta = CFG.megaPts;
+  const sign = megaDelta >= 0 ? '+' : '\u2212';
+  document.getElementById('mega-hint').textContent = sign + Math.abs(megaDelta) + ' pts';
+
+  document.getElementById('settings-overlay').classList.remove('open');
+}
+
+function updateSMNameFieldState() {
+  const enabled = document.getElementById('cfg-sm-enabled').checked;
+  document.getElementById('cfg-sm-name').disabled = !enabled;
+  document.getElementById('cfg-sm-name').style.opacity = enabled ? '1' : '0.4';
+}
+
+function resetDefaults() {
+  CFG = deepClone(DEFAULTS);
+  // re-populate inputs
+  document.getElementById('cfg-sm-enabled').checked = CFG.smEnabled;
+  document.getElementById('cfg-sm-name').value = CFG.smName;
+  document.getElementById('cfg-mega-pts').value = CFG.megaPts;
+  Object.keys(CFG.yg).forEach(k => {
+    document.getElementById('cfg-yg-' + k).value = CFG.yg[k];
+  });
+  Object.keys(CFG.roles).forEach(k => {
+    document.getElementById('cfg-role-' + k).value = CFG.roles[k];
+  });
+  updateSMNameFieldState();
+}
+
+/* ─── navigation ─── */
+function goTo(n) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s' + (n + 1)).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+/* ─── screen 1 ─── */
+function s1Next() {
+  S.sm   = CFG.smEnabled && document.getElementById('sm-t').checked;
+  S.mega = document.getElementById('mega-t').checked;
+  S.yg   = document.getElementById('yg').value;
+  buildRolesUI();
+  goTo(1);
+}
+
+/* ─── screen 2 ─── */
+function buildRolesUI() {
+  const el = document.getElementById('roles-ui');
+  el.innerHTML = '';
+  ROLE_DEFS.forEach(r => {
+    const mult = CFG.roles[r.key];
+    const d = document.createElement('div');
+    d.className = 'role-section';
+    d.innerHTML = `
+      <div class="role-header">
+        <h3>${r.label}</h3>
+        <span class="role-mult">&times;${mult}</span>
+      </div>
+      <div class="add-row">
+        <input type="text" id="inp-${r.key}" placeholder="Name…" onkeydown="if(event.key==='Enter')addP('${r.key}')">
+        <button class="btn-add" onclick="addP('${r.key}')">+ add</button>
+      </div>
+      <div class="chip-area" id="chips-${r.key}">
+        <span class="chip-empty">none yet</span>
+      </div>
+    `;
+    el.appendChild(d);
+  });
+}
+
+function addP(k) {
+  const inp = document.getElementById('inp-' + k);
+  const v = inp.value.trim();
+  if (!v) return;
+  S.people[k].push(v);
+  inp.value = '';
+  renderChips(k);
+}
+
+function removeP(k, i) {
+  S.people[k].splice(i, 1);
+  renderChips(k);
+}
+
+function renderChips(k) {
+  const el = document.getElementById('chips-' + k);
+  if (!el) return;
+  const names = S.people[k];
+  el.innerHTML = names.length === 0
+    ? '<span class="chip-empty">none yet</span>'
+    : names.map((n, i) =>
+        `<span class="chip" onclick="removeP('${k}',${i})">${n} <span class="chip-x">&#10005;</span></span>`
+      ).join('');
+}
+
+function s2Next() {
+  S.queue = [];
+  ROLE_DEFS.forEach(r => {
+    const mult = CFG.roles[r.key];
+    S.people[r.key].forEach(name => S.queue.push({ name, roleLabel: r.label, mult }));
+  });
+  if (!S.queue.length) { alert('Add at least one person first.'); return; }
+  S.votes = [];
+  S.idx = 0;
+  goTo(2);
+  renderVote();
+}
+
+/* ─── screen 3 ─── */
+function renderVote() {
+  const el = document.getElementById('vote-area');
+  if (S.idx >= S.queue.length) { showResults(); return; }
+  const p = S.queue[S.idx];
+  el.innerHTML = `
+    <div class="vote-counter">${S.idx + 1} / ${S.queue.length}</div>
+    <div class="vote-card">
+      <div class="vote-name">${p.name}</div>
+      <div class="vote-role">${p.roleLabel}</div>
+    </div>
+    <div class="vote-btns">
+      <button class="vote-btn v-like"      onclick="vote('like')">Like</button>
+      <button class="vote-btn v-impartial" onclick="vote('impartial')">Impartial</button>
+      <button class="vote-btn v-dislike"   onclick="vote('dislike')">Dislike</button>
+    </div>
+  `;
+}
+
+function vote(v) {
+  S.votes.push(v);
+  S.idx++;
+  renderVote();
+}
+
+/* ─── screen 4 ─── */
+function showResults() {
+  goTo(3);
+  const el = document.getElementById('result-area');
+
+  if (S.sm) {
+    el.innerHTML = `
+      <div class="result-banner r-nocamp">
+        <div class="result-verdict">Not camp</div>
+        <div class="result-pts">${CFG.smName} &mdash; automatic no</div>
+      </div>`;
+    return;
+  }
+
+  let pts = 0;
+  const rows = [];
+
+  if (S.mega && CFG.megaPts !== 0) {
+    pts += CFG.megaPts;
+    rows.push({ label: 'Megasite', val: CFG.megaPts });
+  }
+
+  const ygVal = CFG.yg[S.yg];
+  if (S.yg && ygVal !== 0) {
+    pts += ygVal;
+    rows.push({ label: YG_LABELS[S.yg], val: ygVal });
+  }
+
+  S.queue.forEach((p, i) => {
+    const v = S.votes[i];
+    if (v === 'impartial') return;
+    const d = v === 'like' ? p.mult : -p.mult;
+    pts += d;
+    rows.push({ label: `${p.name} (${v})`, val: d });
+  });
+
+  const camp = pts > 5;
+  const rowsHTML = rows.map(r =>
+    `<div class="bd-row">
+      <span class="bd-label">${r.label}</span>
+      <span class="${r.val >= 0 ? 'pos' : 'neg'}">${r.val >= 0 ? '+' : ''}${r.val}</span>
+    </div>`
+  ).join('') + `<div class="bd-row"><span class="bd-label">Total</span><span>${pts}</span></div>`;
+
+  el.innerHTML = `
+    <div class="result-banner ${camp ? 'r-camp' : 'r-nocamp'}">
+      <div class="result-verdict">${camp ? 'Camp' : 'Not camp'}</div>
+      <div class="result-pts">${pts} points &mdash; threshold &gt; 5</div>
+    </div>
+    ${rows.length ? `<div class="breakdown">${rowsHTML}</div>` : ''}
+  `;
+}
+
+/* ─── reset ─── */
+function resetAll() {
+  S = fresh();
+  document.getElementById('sm-t').checked = false;
+  document.getElementById('mega-t').checked = false;
+  document.getElementById('yg').value = '';
+  goTo(0);
+}
+</script>
+</body>
+</html>
