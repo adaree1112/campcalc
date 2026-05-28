@@ -535,13 +535,13 @@
     <p class="subtitle">Step 1 of 4 &mdash; overall parameters</p>
 
     <div class="field" id="sm-field">
-      <label id="sm-field-label">SM status</label>
+      <label id="sm-field-label">Big Desicion status</label>
       <div class="toggle-row" onclick="document.getElementById('sm-t').click()">
         <label class="toggle" onclick="event.stopPropagation()">
           <input type="checkbox" id="sm-t">
           <span class="t-track"></span>
         </label>
-        <span class="toggle-text" id="sm-toggle-label">SM</span>
+        <span class="toggle-text" id="sm-toggle-label">Big Decision</span>
         <span class="toggle-hint">auto &rarr; not camp</span>
       </div>
     </div>
@@ -628,7 +628,7 @@
 /* ─── defaults ─── */
 const DEFAULTS = {
   smEnabled: true,
-  smName: 'SM',
+  smName: 'Big Decision',
   megaPts: -3,
   yg: { shori_a: -2, shori_b: 2, nevi_a: -10, nevi_b: 5, nofi_a: 5, nofi_b: 0 },
   roles: { rosh: 4, third: 3, second: 2, first: 1 },
@@ -684,7 +684,7 @@ function openSettings() {
 function closeSettings() {
   // read values back into CFG
   CFG.smEnabled = document.getElementById('cfg-sm-enabled').checked;
-  CFG.smName    = document.getElementById('cfg-sm-name').value.trim() || 'SM';
+  CFG.smName    = document.getElementById('cfg-sm-name').value.trim() || 'Big Decision';
   CFG.megaPts   = parseInt(document.getElementById('cfg-mega-pts').value) || 0;
   Object.keys(CFG.yg).forEach(k => {
     CFG.yg[k] = parseInt(document.getElementById('cfg-yg-' + k).value) || 0;
