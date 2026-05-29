@@ -406,6 +406,135 @@
   .result-pts { font-size: 13px; font-family: 'Courier New', monospace; letter-spacing: 0.05em; }
   .r-camp .result-pts { color: var(--green); }
   .r-nocamp .result-pts { color: var(--red); }
+
+
+
+/* ───────────────── SCALE RESULT ───────────────── */
+
+.decision-scale-wrap {
+  margin-top: 2rem;
+  position: relative;
+  padding-top: 34px;
+}
+
+.decision-scale {
+  position: relative;
+  height: 70px;
+  border-radius: 14px;
+  overflow: visible;
+
+  background:
+    linear-gradient(
+      90deg,
+      #a61e1e 0%,
+      #d84a2b 20%,
+      #e6b93d 40%,
+      #efe7a5 55%,
+      #9bcf6b 72%,
+      #2f8f4e 100%
+    );
+
+  border: 1px solid rgba(0,0,0,0.18);
+}
+
+/* ticks */
+
+.scale-tick {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  height: 100%;
+}
+
+.scale-line {
+  width: 1px;
+  height: 42px;
+  background: rgba(0,0,0,0.25);
+  margin: 0 auto;
+}
+
+.scale-num {
+  margin-top: 4px;
+  font-size: 10px;
+  font-family: 'Courier New', monospace;
+  color: rgba(0,0,0,0.65);
+  white-space: nowrap;
+}
+
+/* labels */
+
+.zone-label {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.05em;
+  color: var(--text2);
+  white-space: nowrap;
+}
+
+.zl-1 { left: 10%; }
+.zl-2 { left: 30%; }
+.zl-3 { left: 50%; }
+.zl-4 { left: 72%; }
+.zl-5 { left: 92%; }
+
+/* threshold */
+
+.threshold-marker {
+  position: absolute;
+  top: -12px;
+  bottom: -12px;
+  width: 2px;
+  background: rgba(0,0,0,0.75);
+  transform: translateX(-50%);
+}
+
+.threshold-marker span {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text2);
+}
+
+/* result marker */
+
+.result-marker {
+  position: absolute;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: white;
+  border: 3px solid rgba(0,0,0,0.75);
+
+  transform: translate(-50%, -50%);
+
+  box-shadow:
+    0 0 0 4px rgba(255,255,255,0.35),
+    0 6px 18px rgba(0,0,0,0.25);
+
+  animation: markerIn 0.45s ease;
+}
+
+@keyframes markerIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+
 </style>
 </head>
 <body>
@@ -819,13 +948,14 @@ function vote(v) {
 /* ─── screen 4 ─── */
 function showResults() {
   goTo(3);
+
   const el = document.getElementById('result-area');
 
   if (S.sm) {
     el.innerHTML = `
       <div class="result-banner r-nocamp">
         <div class="result-verdict">Not camp</div>
-        <div class="result-pts">${CFG.smName} &mdash; automatic no</div>
+        <div class="result-pts">${CFG.smName} — automatic no</div>
       </div>`;
     return;
   }
@@ -844,13 +974,55 @@ function showResults() {
 
   const camp = pts > 5;
 
+  /* scale config */
+  const MIN = -45;
+  const MAX = 55;
+  const RANGE = MAX - MIN;
+
+  const clamped = Math.max(MIN, Math.min(MAX, pts));
+  const percent = ((clamped - MIN) / RANGE) * 100;
+
+  /* tick marks every 5 */
+  let ticks = '';
+  for (let i = MIN; i <= MAX; i += 5) {
+    const left = ((i - MIN) / RANGE) * 100;
+
+    ticks += `
+      <div class="scale-tick" style="left:${left}%;">
+        <div class="scale-line"></div>
+        <div class="scale-num">${i}</div>
+      </div>
+    `;
+  }
+
   el.innerHTML = `
     <div class="result-banner ${camp ? 'r-camp' : 'r-nocamp'}">
       <div class="result-verdict">${camp ? 'Camp' : 'Not camp'}</div>
-      <div class="result-pts">${pts} points &mdash; threshold &gt; 5</div>
+      <div class="result-pts">${pts} points</div>
+    </div>
+
+    <div class="decision-scale-wrap">
+
+      <div class="decision-scale">
+
+        ${ticks}
+
+        <!-- threshold marker -->
+        <div class="threshold-marker"
+             style="left:${((5 - MIN) / RANGE) * 100}%;">
+          <span>threshold</span>
+        </div>
+
+        <!-- result marker -->
+        <div class="result-marker"
+             style="left:${percent}%;">
+        </div>
+
+      </div>
     </div>
   `;
 }
+
 
 /* ─── reset ─── */
 function resetAll() {
