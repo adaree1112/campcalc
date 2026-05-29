@@ -421,7 +421,7 @@
   border-radius: 14px;
   overflow: visible;
 
-  /* Reversed gradient: Greens on left, Reds on right */
+  /* Greens on left, Reds on right */
   background:
     linear-gradient(
       90deg,
@@ -435,8 +435,6 @@
 
   border: 1px solid rgba(0,0,0,0.18);
 }
-
-/* ticks */
 
 .scale-tick {
   position: absolute;
@@ -452,27 +450,6 @@
   margin: 0 auto;
 }
 
-/* labels */
-
-.zone-label {
-  position: absolute;
-  top: 0;
-  transform: translateX(-50%);
-  font-size: 10px;
-  font-family: 'Courier New', monospace;
-  letter-spacing: 0.05em;
-  color: var(--text2);
-  white-space: nowrap;
-}
-
-.zl-1 { left: 10%; }
-.zl-2 { left: 30%; }
-.zl-3 { left: 50%; }
-.zl-4 { left: 72%; }
-.zl-5 { left: 92%; }
-
-/* threshold */
-
 .threshold-marker {
   position: absolute;
   top: -12px;
@@ -482,7 +459,7 @@
   transform: translateX(-50%);
 }
 
-.threshold-marker span {
+.threshold-marker .label-top {
   position: absolute;
   top: -18px;
   left: 50%;
@@ -494,7 +471,17 @@
   color: var(--text2);
 }
 
-/* result marker — Shrunk down */
+.threshold-marker .label-bottom {
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  color: var(--text);
+}
+
 .result-marker {
   position: absolute;
   top: 50%;
@@ -503,25 +490,16 @@
   border-radius: 50%;
   background: black;
   border: 2px solid rgba(255,255,255,0.85);
-
   transform: translate(-50%, -50%);
-
   box-shadow:
     0 0 0 3px rgba(255,255,255,0.35),
     0 4px 12px rgba(0,0,0,0.25);
-
   animation: markerIn 0.45s ease;
 }
 
 @keyframes markerIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.3);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 </style>
 </head>
@@ -533,7 +511,6 @@
     <button class="settings-btn" onclick="openSettings()">&#9881; settings</button>
   </div>
 
-  <!-- ══════════════ SETTINGS OVERLAY ══════════════ -->
   <div class="settings-overlay" id="settings-overlay">
     <div class="settings-inner">
       <div class="settings-header">
@@ -541,10 +518,8 @@
         <button class="close-btn" onclick="closeSettings()">&#10005; close</button>
       </div>
 
-      <!-- SM flag -->
       <div class="settings-section">
         <div class="settings-section-title">Big Decision flag</div>
-
         <div class="sm-enable-row">
           <span class="sm-enable-label">Enable Big Decision flag</span>
           <label class="toggle">
@@ -552,17 +527,12 @@
             <span class="t-track"></span>
           </label>
         </div>
-
         <div class="setting-row">
-          <span class="setting-label">
-            Flag name
-            <span class="setting-label-sub">what to call this flag on screen 1</span>
-          </span>
+          <span class="setting-label">Flag name</span>
           <input type="text" id="cfg-sm-name" class="text-input-sm" value="SM">
         </div>
       </div>
 
-      <!-- Megasite -->
       <div class="settings-section">
         <div class="settings-section-title">Megasite</div>
         <div class="setting-row">
@@ -571,95 +541,50 @@
         </div>
       </div>
 
-      <!-- Year groups -->
       <div class="settings-section">
         <div class="settings-section-title">Year group points</div>
-        <div class="setting-row">
-          <span class="setting-label">Shoreshim Aleph</span>
-          <input type="number" id="cfg-yg-shori_a" class="num-input" value="-2">
-        </div>
-        <div class="setting-row">
-          <span class="setting-label">Shoreshim Bet</span>
-          <input type="number" id="cfg-yg-shori_b" class="num-input" value="2">
-        </div>
-        <div class="setting-row">
-          <span class="setting-label">Nevatim Aleph</span>
-          <input type="number" id="cfg-yg-nevi_a" class="num-input" value="-10">
-        </div>
-        <div class="setting-row">
-          <span class="setting-label">Nevatim Bet</span>
-          <input type="number" id="cfg-yg-nevi_b" class="num-input" value="5">
-        </div>
-        <div class="setting-row">
-          <span class="setting-label">Nofim Aleph</span>
-          <input type="number" id="cfg-yg-nofi_a" class="num-input" value="5">
-        </div>
-        <div class="setting-row">
-          <span class="setting-label">Nofim Bet</span>
-          <input type="number" id="cfg-yg-nofi_b" class="num-input" value="0">
-        </div>
+        <div class="setting-row"><span class="setting-label">Shoreshim Aleph</span><input type="number" id="cfg-yg-shori_a" class="num-input" value="-2"></div>
+        <div class="setting-row"><span class="setting-label">Shoreshim Bet</span><input type="number" id="cfg-yg-shori_b" class="num-input" value="2"></div>
+        <div class="setting-row"><span class="setting-label">Nevatim Aleph</span><input type="number" id="cfg-yg-nevi_a" class="num-input" value="-10"></div>
+        <div class="setting-row"><span class="setting-label">Nevatim Bet</span><input type="number" id="cfg-yg-nevi_b" class="num-input" value="5"></div>
+        <div class="setting-row"><span class="setting-label">Nofim Aleph</span><input type="number" id="cfg-yg-nofi_a" class="num-input" value="5"></div>
+        <div class="setting-row"><span class="setting-label">Nofim Bet</span><input type="number" id="cfg-yg-nofi_b" class="num-input" value="0"></div>
       </div>
 
-      <!-- Role multipliers -->
       <div class="settings-section">
         <div class="settings-section-title">Role multipliers</div>
-        <div class="setting-row">
-          <span class="setting-label">Roshim</span>
-          <input type="number" id="cfg-role-rosh" class="num-input" value="4">
-        </div>
-        <div class="setting-row">
-          <span class="setting-label">3rd timers</span>
-          <input type="number" id="cfg-role-third" class="num-input" value="3">
-        </div>
-        <div class="setting-row">
-          <span class="setting-label">2nd timers</span>
-          <input type="number" id="cfg-role-second" class="num-input" value="2">
-        </div>
-        <div class="setting-row">
-          <span class="setting-label">1st timers</span>
-          <input type="number" id="cfg-role-first" class="num-input" value="1">
-        </div>
+        <div class="setting-row"><span class="setting-label">Roshim</span><input type="number" id="cfg-role-rosh" class="num-input" value="4"></div>
+        <div class="setting-row"><span class="setting-label">3rd timers</span><input type="number" id="cfg-role-third" class="num-input" value="3"></div>
+        <div class="setting-row"><span class="setting-label">2nd timers</span><input type="number" id="cfg-role-second" class="num-input" value="2"></div>
+        <div class="setting-row"><span class="setting-label">1st timers</span><input type="number" id="cfg-role-first" class="num-input" value="1"></div>
       </div>
 
       <button class="reset-defaults" onclick="resetDefaults()">&#8635; restore defaults</button>
     </div>
   </div>
 
-  <!-- ══════════════ SCREEN 1: FLAGS ══════════════ -->
   <div id="s1" class="screen active">
     <div class="step-indicator">
-      <div class="step-pip active"></div>
-      <div class="step-pip"></div>
-      <div class="step-pip"></div>
-      <div class="step-pip"></div>
+      <div class="step-pip active"></div><div class="step-pip"></div><div class="step-pip"></div><div class="step-pip"></div>
     </div>
     <h2>Global flags</h2>
     <p class="subtitle">Step 1 of 4 &mdash; overall parameters</p>
-
     <div class="field" id="sm-field">
       <label id="sm-field-label">Big Desicion status</label>
       <div class="toggle-row" onclick="document.getElementById('sm-t').click()">
-        <label class="toggle" onclick="event.stopPropagation()">
-          <input type="checkbox" id="sm-t">
-          <span class="t-track"></span>
-        </label>
+        <label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="sm-t"><span class="t-track"></span></label>
         <span class="toggle-text" id="sm-toggle-label">Big Decision</span>
         <span class="toggle-hint">auto &rarr; not camp</span>
       </div>
     </div>
-
     <div class="field">
       <label>Site type</label>
       <div class="toggle-row" onclick="document.getElementById('mega-t').click()">
-        <label class="toggle" onclick="event.stopPropagation()">
-          <input type="checkbox" id="mega-t">
-          <span class="t-track"></span>
-        </label>
+        <label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="mega-t"><span class="t-track"></span></label>
         <span class="toggle-text">Megasite</span>
         <span class="toggle-hint" id="mega-hint">&minus;3 pts</span>
       </div>
     </div>
-
     <div class="field">
       <label>Year group</label>
       <select id="yg">
@@ -672,19 +597,12 @@
         <option value="nofi_b">Nofim Bet</option>
       </select>
     </div>
-
-    <div class="btn-row">
-      <button class="btn btn-next" onclick="s1Next()">People &rarr;</button>
-    </div>
+    <div class="btn-row"><button class="btn btn-next" onclick="s1Next()">People &rarr;</button></div>
   </div>
 
-  <!-- ══════════════ SCREEN 2: PEOPLE ══════════════ -->
   <div id="s2" class="screen">
     <div class="step-indicator">
-      <div class="step-pip done"></div>
-      <div class="step-pip active"></div>
-      <div class="step-pip"></div>
-      <div class="step-pip"></div>
+      <div class="step-pip done"></div><div class="step-pip active"></div><div class="step-pip"></div><div class="step-pip"></div>
     </div>
     <h2>Add people</h2>
     <p class="subtitle">Step 2 of 4 &mdash; click a name to remove it</p>
@@ -695,26 +613,18 @@
     </div>
   </div>
 
-  <!-- ══════════════ SCREEN 3: VOTE ══════════════ -->
   <div id="s3" class="screen">
     <div class="step-indicator">
-      <div class="step-pip done"></div>
-      <div class="step-pip done"></div>
-      <div class="step-pip active"></div>
-      <div class="step-pip"></div>
+      <div class="step-pip done"></div><div class="step-pip done"></div><div class="step-pip active"></div><div class="step-pip"></div>
     </div>
     <h2>Vote</h2>
     <p class="subtitle">Step 3 of 4 &mdash; no running total shown</p>
     <div id="vote-area"></div>
   </div>
 
-  <!-- ══════════════ SCREEN 4: RESULT ══════════════ -->
   <div id="s4" class="screen">
     <div class="step-indicator">
-      <div class="step-pip done"></div>
-      <div class="step-pip done"></div>
-      <div class="step-pip done"></div>
-      <div class="step-pip done"></div>
+      <div class="step-pip done"></div><div class="step-pip done"></div><div class="step-pip done"></div><div class="step-pip done"></div>
     </div>
     <h2>Result</h2>
     <p class="subtitle">Step 4 of 4 &mdash; final decision</p>
@@ -727,7 +637,6 @@
 </div>
 
 <script>
-/* ─── defaults ─── */
 const DEFAULTS = {
   smEnabled: true,
   smName: 'Big Decision',
@@ -736,19 +645,8 @@ const DEFAULTS = {
   roles: { rosh: 4, third: 3, second: 2, first: 1 },
 };
 
-/* ─── config (live, edited in settings) ─── */
 let CFG = deepClone(DEFAULTS);
-
 function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
-
-const YG_LABELS = {
-  shori_a: 'Shoreshim Aleph',
-  shori_b: 'Shoreshim Bet',
-  nevi_a:  'Nevatim Aleph',
-  nevi_b:  'Nevatim Bet',
-  nofi_a:  'Nofim Aleph',
-  nofi_b:  'Nofim Bet',
-};
 
 const ROLE_DEFS = [
   { key: 'rosh',   label: 'Roshim'     },
@@ -757,51 +655,34 @@ const ROLE_DEFS = [
   { key: 'first',  label: '1st timers' },
 ];
 
-/* ─── session state ─── */
 let S = fresh();
 function fresh() {
-  return {
-    sm: false, mega: false, yg: '',
-    people: { rosh:[], third:[], second:[], first:[] },
-    queue: [], votes: [], idx: 0,
-  };
+  return { sm: false, mega: false, yg: '', people: { rosh:[], third:[], second:[], first:[] }, queue: [], votes: [], idx: 0 };
 }
 
-/* ─── settings panel ─── */
 function openSettings() {
   document.getElementById('cfg-sm-enabled').checked = CFG.smEnabled;
   document.getElementById('cfg-sm-name').value = CFG.smName;
   document.getElementById('cfg-mega-pts').value = CFG.megaPts;
-  Object.keys(CFG.yg).forEach(k => {
-    document.getElementById('cfg-yg-' + k).value = CFG.yg[k];
-  });
-  Object.keys(CFG.roles).forEach(k => {
-    document.getElementById('cfg-role-' + k).value = CFG.roles[k];
-  });
+  Object.keys(CFG.yg).forEach(k => document.getElementById('cfg-yg-' + k).value = CFG.yg[k]);
+  Object.keys(CFG.roles).forEach(k => document.getElementById('cfg-role-' + k).value = CFG.roles[k]);
   updateSMNameFieldState();
   document.getElementById('settings-overlay').classList.add('open');
 }
 
 function closeSettings() {
   CFG.smEnabled = document.getElementById('cfg-sm-enabled').checked;
-  CFG.smName    = document.getElementById('cfg-sm-name').value.trim() || 'Big Decision';
-  CFG.megaPts   = parseInt(document.getElementById('cfg-mega-pts').value) || 0;
-  Object.keys(CFG.yg).forEach(k => {
-    CFG.yg[k] = parseInt(document.getElementById('cfg-yg-' + k).value) || 0;
-  });
-  Object.keys(CFG.roles).forEach(k => {
-    CFG.roles[k] = parseInt(document.getElementById('cfg-role-' + k).value) || 0;
-  });
-
+  CFG.smName = document.getElementById('cfg-sm-name').value.trim() || 'Big Decision';
+  CFG.megaPts = parseInt(document.getElementById('cfg-mega-pts').value) || 0;
+  Object.keys(CFG.yg).forEach(k => CFG.yg[k] = parseInt(document.getElementById('cfg-yg-' + k).value) || 0);
+  Object.keys(CFG.roles).forEach(k => CFG.roles[k] = parseInt(document.getElementById('cfg-role-' + k).value) || 0);
   const smField = document.getElementById('sm-field');
   smField.style.display = CFG.smEnabled ? '' : 'none';
   document.getElementById('sm-toggle-label').textContent = CFG.smName;
-  document.getElementById('sm-field-label').textContent  = CFG.smName + ' status';
-
+  document.getElementById('sm-field-label').textContent = CFG.smName + ' status';
   const megaDelta = CFG.megaPts;
   const sign = megaDelta >= 0 ? '+' : '\u2212';
   document.getElementById('mega-hint').textContent = sign + Math.abs(megaDelta) + ' pts';
-
   document.getElementById('settings-overlay').classList.remove('open');
 }
 
@@ -813,35 +694,23 @@ function updateSMNameFieldState() {
 
 function resetDefaults() {
   CFG = deepClone(DEFAULTS);
-  document.getElementById('cfg-sm-enabled').checked = CFG.smEnabled;
-  document.getElementById('cfg-sm-name').value = CFG.smName;
-  document.getElementById('cfg-mega-pts').value = CFG.megaPts;
-  Object.keys(CFG.yg).forEach(k => {
-    document.getElementById('cfg-yg-' + k).value = CFG.yg[k];
-  });
-  Object.keys(CFG.roles).forEach(k => {
-    document.getElementById('cfg-role-' + k).value = CFG.roles[k];
-  });
-  updateSMNameFieldState();
+  openSettings();
 }
 
-/* ─── navigation ─── */
 function goTo(n) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('s' + (n + 1)).classList.add('active');
   window.scrollTo(0, 0);
 }
 
-/* ─── screen 1 ─── */
 function s1Next() {
-  S.sm   = CFG.smEnabled && document.getElementById('sm-t').checked;
+  S.sm = CFG.smEnabled && document.getElementById('sm-t').checked;
   S.mega = document.getElementById('mega-t').checked;
-  S.yg   = document.getElementById('yg').value;
+  S.yg = document.getElementById('yg').value;
   buildRolesUI();
   goTo(1);
 }
 
-/* ─── screen 2 ─── */
 function buildRolesUI() {
   const el = document.getElementById('roles-ui');
   el.innerHTML = '';
@@ -850,18 +719,9 @@ function buildRolesUI() {
     const d = document.createElement('div');
     d.className = 'role-section';
     d.innerHTML = `
-      <div class="role-header">
-        <h3>${r.label}</h3>
-        <span class="role-mult">&times;${mult}</span>
-      </div>
-      <div class="add-row">
-        <input type="text" id="inp-${r.key}" placeholder="Name…" onkeydown="if(event.key==='Enter')addP('${r.key}')">
-        <button class="btn-add" onclick="addP('${r.key}')">+ add</button>
-      </div>
-      <div class="chip-area" id="chips-${r.key}">
-        <span class="chip-empty">none yet</span>
-      </div>
-    `;
+      <div class="role-header"><h3>${r.label}</h3><span class="role-mult">&times;${mult}</span></div>
+      <div class="add-row"><input type="text" id="inp-${r.key}" placeholder="Name…" onkeydown="if(event.key==='Enter')addP('${r.key}')"><button class="btn-add" onclick="addP('${r.key}')">+ add</button></div>
+      <div class="chip-area" id="chips-${r.key}"><span class="chip-empty">none yet</span></div>`;
     el.appendChild(d);
   });
 }
@@ -882,132 +742,64 @@ function removeP(k, i) {
 
 function renderChips(k) {
   const el = document.getElementById('chips-' + k);
-  if (!el) return;
   const names = S.people[k];
-  el.innerHTML = names.length === 0
-    ? '<span class="chip-empty">none yet</span>'
-    : names.map((n, i) =>
-        `<span class="chip" onclick="removeP('${k}',${i})">${n} <span class="chip-x">&#10005;</span></span>`
-      ).join('');
+  el.innerHTML = names.length === 0 ? '<span class="chip-empty">none yet</span>' : names.map((n, i) => `<span class="chip" onclick="removeP('${k}',${i})">${n} <span class="chip-x">&#10005;</span></span>`).join('');
 }
 
 function s2Next() {
   S.queue = [];
-  ROLE_DEFS.forEach(r => {
-    const mult = CFG.roles[r.key];
-    S.people[r.key].forEach(name => S.queue.push({ name, roleLabel: r.label, mult }));
-  });
-  if (!S.queue.length) { alert('Add at least one person first.'); return; }
-  S.votes = [];
-  S.idx = 0;
-  goTo(2);
-  renderVote();
+  ROLE_DEFS.forEach(r => { S.people[r.key].forEach(name => S.queue.push({ name, roleLabel: r.label, mult: CFG.roles[r.key] })); });
+  if (!S.queue.length) { alert('Add people first.'); return; }
+  S.votes = []; S.idx = 0;
+  goTo(2); renderVote();
 }
 
-/* ─── screen 3 ─── */
 function renderVote() {
   const el = document.getElementById('vote-area');
   if (S.idx >= S.queue.length) { showResults(); return; }
   const p = S.queue[S.idx];
-  el.innerHTML = `
-    <div class="vote-counter">${S.idx + 1} / ${S.queue.length}</div>
-    <div class="vote-card">
-      <div class="vote-name">${p.name}</div>
-      <div class="vote-role">${p.roleLabel}</div>
-    </div>
-    <div class="vote-btns">
-      <button class="vote-btn v-like"      onclick="vote('like')">Like</button>
-      <button class="vote-btn v-impartial" onclick="vote('impartial')">Impartial</button>
-      <button class="vote-btn v-dislike"   onclick="vote('dislike')">Dislike</button>
-    </div>
-  `;
+  el.innerHTML = `<div class="vote-counter">${S.idx + 1} / ${S.queue.length}</div><div class="vote-card"><div class="vote-name">${p.name}</div><div class="vote-role">${p.roleLabel}</div></div><div class="vote-btns"><button class="vote-btn v-like" onclick="vote('like')">Like</button><button class="vote-btn v-impartial" onclick="vote('impartial')">Impartial</button><button class="vote-btn v-dislike" onclick="vote('dislike')">Dislike</button></div>`;
 }
 
-function vote(v) {
-  S.votes.push(v);
-  S.idx++;
-  renderVote();
-}
+function vote(v) { S.votes.push(v); S.idx++; renderVote(); }
 
-/* ─── screen 4 ─── */
 function showResults() {
   goTo(3);
   const el = document.getElementById('result-area');
-
-  if (S.sm) {
-    el.innerHTML = `
-      <div class="result-banner r-nocamp">
-        <div class="result-verdict">Not camp</div>
-        <div class="result-pts">${CFG.smName} — automatic no</div>
-      </div>`;
-    return;
-  }
+  if (S.sm) { el.innerHTML = `<div class="result-banner r-nocamp"><div class="result-verdict">Not camp</div><div class="result-pts">${CFG.smName} — auto no</div></div>`; return; }
 
   let pts = 0;
   if (S.mega) pts += CFG.megaPts;
   if (S.yg) pts += CFG.yg[S.yg] || 0;
-
-  S.queue.forEach((p, i) => {
-    const v = S.votes[i];
-    if (v === 'impartial') return;
-    pts += v === 'like' ? p.mult : -p.mult;
-  });
+  S.queue.forEach((p, i) => { if (S.votes[i] !== 'impartial') pts += S.votes[i] === 'like' ? p.mult : -p.mult; });
 
   const camp = pts > 5;
-
-  /* Scale limits */
-  const MIN = -45;
-  const MAX = 55;
-  const RANGE = MAX - MIN;
-
+  const MIN = -45, MAX = 55, RANGE = MAX - MIN;
   const clamped = Math.max(MIN, Math.min(MAX, pts));
-  
-  /* Reverse the placement math: +ve values map to the left side */
   const percent = ((MAX - clamped) / RANGE) * 100;
-  const thresholdPercent = ((MAX - 5) / RANGE) * 100;
+  const threshPercent = ((MAX - 5) / RANGE) * 100;
 
-  /* Render blank tick lines (no textual numbers) */
   let ticks = '';
-  for (let i = MIN; i <= MAX; i += 5) {
-    const left = ((MAX - i) / RANGE) * 100;
-    ticks += `
-      <div class="scale-tick" style="left:${left}%;">
-        <div class="scale-line"></div>
-      </div>
-    `;
-  }
+  for (let i = MIN; i <= MAX; i += 5) { ticks += `<div class="scale-tick" style="left:${((MAX - i) / RANGE) * 100}%;"><div class="scale-line"></div></div>`; }
 
   el.innerHTML = `
     <div class="result-banner ${camp ? 'r-camp' : 'r-nocamp'}">
       <div class="result-verdict">${camp ? 'Camp' : 'Not camp'}</div>
       <div class="result-pts">${pts} points</div>
     </div>
-
     <div class="decision-scale-wrap">
       <div class="decision-scale">
         ${ticks}
-
-        <!-- threshold marker -->
-        <div class="threshold-marker" style="left:${thresholdPercent}%;">
-          <span>threshold</span>
+        <div class="threshold-marker" style="left:${threshPercent}%;">
+          <span class="label-top">threshold</span>
+          <span class="label-bottom">5</span>
         </div>
-
-        <!-- result marker -->
-        <div class="result-marker" style="left:${percent}%;">
-        </div>
+        <div class="result-marker" style="left:${percent}%;"></div>
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
-/* ─── reset ─── */
-function resetAll() {
-  S = fresh();
-  document.getElementById('sm-t').checked = false;
-  document.getElementById('mega-t').checked = false;
-  document.getElementById('yg').value = '';
-  goTo(0);
-}
+function resetAll() { S = fresh(); goTo(0); }
 </script>
 </body>
 </html>
