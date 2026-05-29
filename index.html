@@ -406,22 +406,6 @@
   .result-pts { font-size: 13px; font-family: 'Courier New', monospace; letter-spacing: 0.05em; }
   .r-camp .result-pts { color: var(--green); }
   .r-nocamp .result-pts { color: var(--red); }
-
-  .breakdown { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
-  .bd-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 14px;
-    font-size: 13px;
-    border-bottom: 1px solid var(--border);
-    font-family: 'Courier New', monospace;
-  }
-  .bd-row:last-child { border-bottom: none; font-weight: bold; background: var(--surface2); font-size: 14px; }
-  .bd-label { color: var(--text2); }
-  .bd-row:last-child .bd-label { color: var(--text); }
-  .pos { color: var(--green); }
-  .neg { color: var(--red); }
 </style>
 </head>
 <body>
@@ -847,41 +831,24 @@ function showResults() {
   }
 
   let pts = 0;
-  const rows = [];
 
-  if (S.mega && CFG.megaPts !== 0) {
-    pts += CFG.megaPts;
-    rows.push({ label: 'Megasite', val: CFG.megaPts });
-  }
+  if (S.mega) pts += CFG.megaPts;
 
-  const ygVal = CFG.yg[S.yg];
-  if (S.yg && ygVal !== 0) {
-    pts += ygVal;
-    rows.push({ label: YG_LABELS[S.yg], val: ygVal });
-  }
+  if (S.yg) pts += CFG.yg[S.yg] || 0;
 
   S.queue.forEach((p, i) => {
     const v = S.votes[i];
     if (v === 'impartial') return;
-    const d = v === 'like' ? p.mult : -p.mult;
-    pts += d;
-    rows.push({ label: `${p.name} (${v})`, val: d });
+    pts += v === 'like' ? p.mult : -p.mult;
   });
 
   const camp = pts > 5;
-  const rowsHTML = rows.map(r =>
-    `<div class="bd-row">
-      <span class="bd-label">${r.label}</span>
-      <span class="${r.val >= 0 ? 'pos' : 'neg'}">${r.val >= 0 ? '+' : ''}${r.val}</span>
-    </div>`
-  ).join('') + `<div class="bd-row"><span class="bd-label">Total</span><span>${pts}</span></div>`;
 
   el.innerHTML = `
     <div class="result-banner ${camp ? 'r-camp' : 'r-nocamp'}">
       <div class="result-verdict">${camp ? 'Camp' : 'Not camp'}</div>
       <div class="result-pts">${pts} points &mdash; threshold &gt; 5</div>
     </div>
-    ${rows.length ? `<div class="breakdown">${rowsHTML}</div>` : ''}
   `;
 }
 
