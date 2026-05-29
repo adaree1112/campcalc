@@ -407,8 +407,6 @@
   .r-camp .result-pts { color: var(--green); }
   .r-nocamp .result-pts { color: var(--red); }
 
-
-
 /* ───────────────── SCALE RESULT ───────────────── */
 
 .decision-scale-wrap {
@@ -423,15 +421,16 @@
   border-radius: 14px;
   overflow: visible;
 
+  /* Reversed gradient: Greens on left, Reds on right */
   background:
     linear-gradient(
       90deg,
-      #a61e1e 0%,
-      #d84a2b 20%,
-      #e6b93d 40%,
-      #efe7a5 55%,
-      #9bcf6b 72%,
-      #2f8f4e 100%
+      #2f8f4e 0%,
+      #9bcf6b 28%,
+      #efe7a5 45%,
+      #e6b93d 60%,
+      #d84a2b 80%,
+      #a61e1e 100%
     );
 
   border: 1px solid rgba(0,0,0,0.18);
@@ -451,14 +450,6 @@
   height: 42px;
   background: rgba(0,0,0,0.25);
   margin: 0 auto;
-}
-
-.scale-num {
-  margin-top: 4px;
-  font-size: 10px;
-  font-family: 'Courier New', monospace;
-  color: rgba(0,0,0,0.65);
-  white-space: nowrap;
 }
 
 /* labels */
@@ -503,22 +494,21 @@
   color: var(--text2);
 }
 
-/* result marker */
-
+/* result marker — Shrunk down */
 .result-marker {
   position: absolute;
   top: 50%;
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: black;
-  border: 3px solid rgba(255,255,255,0.75);
+  border: 2px solid rgba(255,255,255,0.85);
 
   transform: translate(-50%, -50%);
 
   box-shadow:
-    0 0 0 4px rgba(255,255,255,0.35),
-    0 6px 18px rgba(0,0,0,0.25);
+    0 0 0 3px rgba(255,255,255,0.35),
+    0 4px 12px rgba(0,0,0,0.25);
 
   animation: markerIn 0.45s ease;
 }
@@ -533,8 +523,6 @@
     transform: translate(-50%, -50%) scale(1);
   }
 }
-
-
 </style>
 </head>
 <body>
@@ -781,7 +769,6 @@ function fresh() {
 
 /* ─── settings panel ─── */
 function openSettings() {
-  // push current CFG into inputs
   document.getElementById('cfg-sm-enabled').checked = CFG.smEnabled;
   document.getElementById('cfg-sm-name').value = CFG.smName;
   document.getElementById('cfg-mega-pts').value = CFG.megaPts;
@@ -796,7 +783,6 @@ function openSettings() {
 }
 
 function closeSettings() {
-  // read values back into CFG
   CFG.smEnabled = document.getElementById('cfg-sm-enabled').checked;
   CFG.smName    = document.getElementById('cfg-sm-name').value.trim() || 'Big Decision';
   CFG.megaPts   = parseInt(document.getElementById('cfg-mega-pts').value) || 0;
@@ -807,7 +793,6 @@ function closeSettings() {
     CFG.roles[k] = parseInt(document.getElementById('cfg-role-' + k).value) || 0;
   });
 
-  // reflect changes in screen 1 UI
   const smField = document.getElementById('sm-field');
   smField.style.display = CFG.smEnabled ? '' : 'none';
   document.getElementById('sm-toggle-label').textContent = CFG.smName;
@@ -828,7 +813,6 @@ function updateSMNameFieldState() {
 
 function resetDefaults() {
   CFG = deepClone(DEFAULTS);
-  // re-populate inputs
   document.getElementById('cfg-sm-enabled').checked = CFG.smEnabled;
   document.getElementById('cfg-sm-name').value = CFG.smName;
   document.getElementById('cfg-mega-pts').value = CFG.megaPts;
@@ -948,7 +932,6 @@ function vote(v) {
 /* ─── screen 4 ─── */
 function showResults() {
   goTo(3);
-
   const el = document.getElementById('result-area');
 
   if (S.sm) {
@@ -961,9 +944,7 @@ function showResults() {
   }
 
   let pts = 0;
-
   if (S.mega) pts += CFG.megaPts;
-
   if (S.yg) pts += CFG.yg[S.yg] || 0;
 
   S.queue.forEach((p, i) => {
@@ -974,23 +955,24 @@ function showResults() {
 
   const camp = pts > 5;
 
-  /* scale config */
+  /* Scale limits */
   const MIN = -45;
   const MAX = 55;
   const RANGE = MAX - MIN;
 
   const clamped = Math.max(MIN, Math.min(MAX, pts));
-  const percent = ((clamped - MIN) / RANGE) * 100;
+  
+  /* Reverse the placement math: +ve values map to the left side */
+  const percent = ((MAX - clamped) / RANGE) * 100;
+  const thresholdPercent = ((MAX - 5) / RANGE) * 100;
 
-  /* tick marks every 5 */
+  /* Render blank tick lines (no textual numbers) */
   let ticks = '';
   for (let i = MIN; i <= MAX; i += 5) {
-    const left = ((i - MIN) / RANGE) * 100;
-
+    const left = ((MAX - i) / RANGE) * 100;
     ticks += `
       <div class="scale-tick" style="left:${left}%;">
         <div class="scale-line"></div>
-        <div class="scale-num">${i}</div>
       </div>
     `;
   }
@@ -1002,27 +984,21 @@ function showResults() {
     </div>
 
     <div class="decision-scale-wrap">
-
       <div class="decision-scale">
-
         ${ticks}
 
         <!-- threshold marker -->
-        <div class="threshold-marker"
-             style="left:${((5 - MIN) / RANGE) * 100}%;">
+        <div class="threshold-marker" style="left:${thresholdPercent}%;">
           <span>threshold</span>
         </div>
 
         <!-- result marker -->
-        <div class="result-marker"
-             style="left:${percent}%;">
+        <div class="result-marker" style="left:${percent}%;">
         </div>
-
       </div>
     </div>
   `;
 }
-
 
 /* ─── reset ─── */
 function resetAll() {
